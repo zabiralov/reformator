@@ -9,7 +9,7 @@ use utf8;
 use 5.010;
 use Getopt::Long;
 
-my $VERSION = '1.0';
+my $VERSION = '1.0.1';
 my $NAME = 'reformator ';
 my $HELP = '
 
@@ -25,15 +25,16 @@ or
 
 OPTIONS:
 
-   -d / --delimeter <STR> -- set delimeter to STR (default - "=")
-   -s / --spacer <STR> -- set spacer to STR (default - " " - one space)
-   -t / --topic <STR> -- set topic to STR (default - "#")
-   -a / --after <INT> -- set number of fill symbols after (on right) delimeter symbol
-   -b / --before <INT> -- set number of fill symbols before (on left) delimeter symbol
+    -d / --delimeter <STR> -- set delimeter to STR (default - "=")
+    -s / --spacer <STR> -- set spacer to STR (default - " " - one space)
+    -t / --topic <STR> -- set topic to STR (default - "#")
+    -c / --comment <STR> -- set comment to STR (default - "#")
+    -a / --after <INT> -- set number of fill symbols after (on right) delimeter symbol
+    -b / --before <INT> -- set number of fill symbols before (on left) delimeter symbol
 
 
-   -h / --help -- print help
-   -v / --version -- print version
+    -h / --help -- print help
+    -v / --version -- print version
   ';
 
 my $after = 1;
@@ -43,6 +44,7 @@ my $help_flag = undef;
 
 my (@output, @string, @input);
 my $topic = "#";
+my $comment = "#";
 my $delimeter = "=";
 my $spacer = " ";
 my $final_string = "";
@@ -52,14 +54,15 @@ my $maximum = 0;
 my $counter = 0;
 
 GetOptions (
-            "after=i" => \$after,
-            "before=i" => \$before,
-            "delimeter=s" => \$delimeter,
-            "spacer=s" => \$spacer,
-            "topic=s" => \$topic,
-            "version" => \$version_flag,
-            "help" => \$help_flag
-           ) or die ("Error in command line arguments!\n");
+    "after=i" => \$after,
+    "before=i" => \$before,
+    "delimeter=s" => \$delimeter,
+    "spacer=s" => \$spacer,
+    "topic=s" => \$topic,
+    "comment=s" => \$comment,
+    "version" => \$version_flag,
+    "help" => \$help_flag
+    ) or die ("Error in command line arguments!\n");
 
 if (defined ($version_flag)) {
     say $NAME . $VERSION;
@@ -96,13 +99,19 @@ if ($topic =~ m/^$/) {
     exit 1;
 }
 
+if ($comment =~ m/^$/) {
+    say "--comment value must be non-empty";
+    exit 1;
+}
+
+
 $output[0] = $topic;
 
 while (<STDIN>) {
     chomp;
     if ($_ =~ m/^$/) {
         next;
-    } elsif ($_ =~ m/^#/) {
+    } elsif ($_ =~ m/^$comment/) {
         next;
     } elsif ($_ =~ m/^\s*$/) {
         next;
