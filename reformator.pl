@@ -9,7 +9,7 @@ use utf8;
 use 5.010;
 use Getopt::Long;
 
-my $VERSION = '1.0.1';
+my $VERSION = '1.0.2';
 my $NAME = 'reformator ';
 my $HELP = '
 
@@ -29,6 +29,7 @@ OPTIONS:
     -s / --spacer <STR> -- set spacer to STR (default - " " - one space)
     -t / --topic <STR> -- set topic to STR (default - "#")
     -c / --comment <STR> -- set comment to STR (default - "#")
+    -e / --escaper <STR> -- set escaper symbol to STR (default - "~")
     -a / --after <INT> -- set number of fill symbols after (on right) delimeter symbol
     -b / --before <INT> -- set number of fill symbols before (on left) delimeter symbol
 
@@ -47,6 +48,7 @@ my $topic = "#";
 my $comment = "#";
 my $delimeter = "=";
 my $spacer = " ";
+my $escaper = "~";
 my $final_string = "";
 my $fill_string = "";
 my $current = 0;
@@ -58,6 +60,7 @@ GetOptions (
     "before=i" => \$before,
     "delimeter=s" => \$delimeter,
     "spacer=s" => \$spacer,
+    "escaper=s" => \$escaper,
     "topic=s" => \$topic,
     "comment=s" => \$comment,
     "version" => \$version_flag,
@@ -139,15 +142,22 @@ foreach (@input) {
 $current = 0;
 
 foreach (@input) {
- 
+
+    # Skip [section_name] from input
     if ($_ =~ m/\[/) {
         push(@output, $_);
         next;
     }
 
+    # Skip strings escaped with escaper
+    if ($_ =~ m/^$escaper/) {
+        $_ =~ s/^$escaper/$comment/;
+    }
+
+
     @string = split($delimeter, $_, 2);
     $current = length($string[0]);
- 
+    
     until ($counter == ($maximum - $current + $after + $before) ) {
         $fill_string = $fill_string . $spacer;
         $counter++;
